@@ -1,6 +1,7 @@
 # the template is from 112 website http://www.cs.cmu.edu/~112-n19/notes/notes-animations-demos.html#sideScrollerDemo
 # Side Scroller Demo
 import copy
+import random
 from tkinter import *
 from map import Maze
 from Entity import *
@@ -27,6 +28,7 @@ def init(data):
     data.timePassed = 0
     data.direction = ''
     data.road = getRoads(data)
+    data.enemy = []
 def getPlayerBound(data):
     return (data.centerX - data.player.size, data.centerY - data.player.size,
             data.centerX + data.player.size, data.centerY + data.player.size)
@@ -38,11 +40,28 @@ def getWallBounds(data, wall):
     (x1, y1) = (x0 + data.wallSize, y0 + data.wallSize)
     return (x0, y0, x1, y1)
 
+def getEnemyBound(data,enemy):
+        (x0, y0) = (data.walls[enemy][0] * data.wallSize - data.wallSize * data.size / 2 + data.centerX + data.scrollX,
+                    data.walls[enemy][1] * data.wallSize - data.wallSize * data.size / 2 + data.centerY + data.scrollY)
+        (x1, y1) = (x0 + data.wallSize, y0 + data.wallSize)
+        return (x0, y0, x1, y1)
+
+
 def getRoads(data):
-    allCell = copy.deepcopy(data.gameWorld.baord)
-    for walls in data.walls:
-        allCell.remove(walls)
+    allCell = []
+    for i in range(data.size):
+        for j in range(data.size):
+            allCell.append((i,j))
+    for wall in data.walls:
+        allCell.remove(wall)
     return allCell
+
+def getEnemyCell(data):
+    for i in range(data.size):
+        for j in range(data.size):
+            if(data.gameWorld.board[i][j]==3):
+                data.enemy.append((i,j))
+
 def getWalls(data):
     walls = []
     for row in range(len(data.gameWorld.board)):
@@ -100,18 +119,27 @@ def keyPressed(event, data):
 
 def timerFired(data):
     data.timePassed += 1
-    if(data.timePassed % 1000 == 0):
-        data.world.addEntity(Enemy())
-
+    if(data.timePassed % 100 == 0):
+        x = random.choice(data.road)[0]
+        y = random.choice(data.road)[1]
+        data.gameWorld.addEnemy(Enemy(data.gameWorld,[],5,None,data.wallSize/2,
+                    x,y))
+        print("enemy created at (%d,%d)"%(x,y))
+        print(data.gameWorld.board[y][x])
 
 def redrawAll(canvas, data):
     getWallHit(data)
-    print(data.player.x,data.player.y)
+    getEnemyCell(data)
     for cell in range(len(data.walls)):
         (x0, y0, x1, y1) = getWallBounds(data, cell)
         canvas.create_rectangle(x0 , y0,
                                 x1 , y1,
                                 fill="black")
+    for enemy in range(len(data.enemy)):
+        (x0,y0,x1,y1) = getEnemyBound(data,enemy)
+        canvas.create_rectangle(x0, y0,
+                                x1, y1,
+                                fill="blue")
     canvas.create_rectangle(getPlayerBound(data), fill="red")
 
 
