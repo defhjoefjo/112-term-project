@@ -41,8 +41,8 @@ def getWallBounds(data, wall):
     return (x0, y0, x1, y1)
 
 def getEnemyBound(data,enemy):
-        (x0, y0) = (data.walls[enemy][0] * data.wallSize - data.wallSize * data.size / 2 + data.centerX + data.scrollX,
-                    data.walls[enemy][1] * data.wallSize - data.wallSize * data.size / 2 + data.centerY + data.scrollY)
+        (x0, y0) = (data.enemy[enemy][0] * data.wallSize - data.wallSize * data.size / 2 + data.centerX + data.scrollX,
+                    data.enemy[enemy][1] * data.wallSize - data.wallSize * data.size / 2 + data.centerY + data.scrollY)
         (x1, y1) = (x0 + data.wallSize, y0 + data.wallSize)
         return (x0, y0, x1, y1)
 
@@ -60,7 +60,7 @@ def getEnemyCell(data):
     for i in range(data.size):
         for j in range(data.size):
             if(data.gameWorld.board[i][j]==3):
-                data.enemy.append((i,j))
+                    data.enemy.append((i,j))
 
 def getWalls(data):
     walls = []
@@ -124,12 +124,14 @@ def timerFired(data):
         y = random.choice(data.road)[1]
         data.gameWorld.addEnemy(Enemy(data.gameWorld,[],5,None,data.wallSize/2,
                     x,y))
+        getEnemyCell(data)
         print("enemy created at (%d,%d)"%(x,y))
         print(data.gameWorld.board[y][x])
 
 def redrawAll(canvas, data):
     getWallHit(data)
-    getEnemyCell(data)
+    print(data.enemy)
+
     for cell in range(len(data.walls)):
         (x0, y0, x1, y1) = getWallBounds(data, cell)
         canvas.create_rectangle(x0 , y0,
