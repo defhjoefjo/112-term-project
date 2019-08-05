@@ -78,3 +78,6 @@ class Maze(object):
             for col in range(self.width):
                 if checkWalls(self.board, 1, row, col) == 0:
                     self.board[row][col] = 0  # clear some single block
+
+    def setPlayer(self):
+        self.board[self.width//2][self.height//2] = 2

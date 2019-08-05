@@ -27,8 +27,9 @@ class Entity(object):
 class Player(Entity):
     def __init__(self,world,inventory,health,state,size,x,y):
         super().__init__(world,inventory,health,state,size,x,y)
-
+        self.id = 2
 
 class Enemy(Entity):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, world, inventory, health, state, size, x, y):
+        super().__init__(world, inventory, health, state, size, x, y)
+        self.id = 3
