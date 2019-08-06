@@ -44,8 +44,8 @@ def getWallBounds(data, wall):
     return (x0, y0, x1, y1)
 
 def getEnemyBound(data,enemy):
-        (x0, y0) = (data.enemy[enemy][0] * data.wallSize - data.wallSize * data.size / 2 + data.centerX + data.scrollX,
-                    data.enemy[enemy][1] * data.wallSize - data.wallSize * data.size / 2 + data.centerY + data.scrollY)
+        (x0, y0) = (enemy.x * data.wallSize - data.wallSize * data.size / 2 + data.centerX + data.scrollX,
+                    enemy.y * data.wallSize - data.wallSize * data.size / 2 + data.centerY + data.scrollY)
         (x1, y1) = (x0 + data.wallSize, y0 + data.wallSize)
         return (x0, y0, x1, y1)
 
@@ -65,6 +65,8 @@ def getEnemyCell(data):
             if(data.gameWorld.board[i][j]==3):
                 if((i,j) not in data.enemy):
                     data.enemy.append((i,j))
+            if((i,j) in data.enemy and data.gameWorld.board[i][j]==0):
+                data.enemy.remove((i,j))
 
 def getWalls(data):
     walls = []
@@ -95,7 +97,13 @@ def getWallHit(data):
             if(data.direction == 'l'):
                 data.scrollX -= data.wallSize
                 data.player.move(1, 0)
-
+        if(data.gameWorld.entities != []):
+            for enemy in data.gameWorld.entities:
+                (cx0,cy0,cx1,cy1) = getEnemyBound(data,enemy)
+                if(cx0 == bx0 and cy0 == by0 and cx1 == bx1 and cy1 == by1):
+                    enemy.dirX *= -1
+                    enemy.dirY *= -1
+                    enemy.move()
 
 def mousePressed(event, data):
     pass
@@ -105,25 +113,26 @@ def keyPressed(event, data):
     if (event.keysym == "Left"):
         data.scrollX += data.wallSize
         data.direction = 'l'
-        data.player.move(-1,0)
+        (data.player.dirX, data.player.dirY) = (-1,0)
     elif (event.keysym == "Right"):
         data.scrollX -= data.wallSize
         data.direction = 'r'
-        data.player.move(1, 0)
+        (data.player.dirX, data.player.dirY) = (1,0)
     elif (event.keysym == "Up"):
         data.scrollY += data.wallSize
         data.direction = 'u'
-        data.player.move(0, -1)
+        (data.player.dirX, data.player.dirY) = (0,-1)
     elif (event.keysym == "Down"):
         data.scrollY -= data.wallSize
         data.direction = 'd'
-        data.player.move(0, 1)
+        (data.player.dirX, data.player.dirY) = (0,1)
+    data.player.move(data.player.dirX,data.player.dirY)
 
 
 
 def timerFired(data):
     data.timePassed += 1
-    if(data.timePassed % 50 == 0):
+    if(data.timePassed % 10 == 0):
         x = random.choice(data.road)[1]
         y = random.choice(data.road)[0]
         data.gameWorld.addEnemy(Enemy(data.gameWorld,[],ENEMY_HEALTH,None,data.wallSize/2,
@@ -132,6 +141,8 @@ def timerFired(data):
         print("enemy created at (%d,%d)"%(x,y))
         print(data.gameWorld.board[y][x])
         print(data.enemy)
+        for enemy in data.gameWorld.entities:
+            enemy.randomMove()
 
 def redrawAll(canvas, data):
     getWallHit(data)
@@ -143,7 +154,7 @@ def redrawAll(canvas, data):
         canvas.create_rectangle(x0 , y0,
                                 x1 , y1,
                                 fill="black")
-    for enemy in range(len(data.enemy)):
+    for enemy in data.gameWorld.entities:
         (x0,y0,x1,y1) = getEnemyBound(data,enemy)
         canvas.create_rectangle(x0, y0,
                                 x1, y1,

@@ -48,10 +48,10 @@ class Enemy(Entity):
     def __init__(self, world, inventory, health, state, size, x, y):
         super().__init__(world, inventory, health, state, size, x, y)
         self.id = 3
-    def randomMove(self):
-        (dirX, dirY) = random.choice([(1, 0), (0, 1), (-1, 0), (0, -1)])
-        self.move(dirX, dirY)
 
+    def randomMove(self):
+        (self.dirX, self.dirY) = random.choice([(1, 0), (0, 1), (-1, 0), (0, -1)])
+        self.move()
 
     def move(self):
             self.world.board[self.y][self.x] = 0
