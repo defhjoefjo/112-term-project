@@ -4,7 +4,7 @@ class world(object):
         self.entities = []
         self.board = board
         self.weapons = []
-
+        self.player = None
     def addEnemy(self,entity):
         if not isinstance(entity,Enemy):
             return None

@@ -5,25 +5,28 @@ import random
 from tkinter import *
 from map import Maze
 from Entity import *
+from statusMachine import *
 from world import world
-
+from SETTINGS import *
 def init(data):
     # initialize and optimize the board
-
-    data.size = 50
+    data.size = BOARDSIZE
     maze = Maze(data.size, data.size)
     maze.initializeMap()
     for i in range(12):
         maze.optimizeMap()
     maze.setPlayer()
-    data.gameWorld = world(copy.deepcopy(maze.board))# The board of the world is to process all the events
-    data.wallSize = 25
+
+    data.wallSize = WALLSIZE
     data.centerX = data.width / 2
     data.centerY = data.height / 2
     data.scrollX = -data.wallSize/2
     data.scrollY = -data.wallSize/2
-    data.player = Player(data.gameWorld,[],10,None,data.wallSize/2,data.size//2,data.size//2)
-    data.gameWorld.entities.append(data.player)
+    data.gameWorld = world(copy.deepcopy(
+        maze.board))  # The board of the world is to process all the events
+    data.player = Player(data.gameWorld,[],PLAYER_HEALTH,None,data.wallSize/2,data.size//2,data.size//2)
+
+    data.gameWorld.player = data.player
     data.walls = getWalls(data)
     data.timePassed = 0
     data.direction = ''
@@ -60,6 +63,7 @@ def getEnemyCell(data):
     for i in range(data.size):
         for j in range(data.size):
             if(data.gameWorld.board[i][j]==3):
+                if((i,j) not in data.enemy):
                     data.enemy.append((i,j))
 
 def getWalls(data):
@@ -114,23 +118,25 @@ def keyPressed(event, data):
         data.scrollY -= data.wallSize
         data.direction = 'd'
         data.player.move(0, 1)
-    print('start here')
+
 
 
 def timerFired(data):
     data.timePassed += 1
-    if(data.timePassed % 100 == 0):
-        x = random.choice(data.road)[0]
-        y = random.choice(data.road)[1]
-        data.gameWorld.addEnemy(Enemy(data.gameWorld,[],5,None,data.wallSize/2,
+    if(data.timePassed % 50 == 0):
+        x = random.choice(data.road)[1]
+        y = random.choice(data.road)[0]
+        data.gameWorld.addEnemy(Enemy(data.gameWorld,[],ENEMY_HEALTH,None,data.wallSize/2,
                     x,y))
         getEnemyCell(data)
         print("enemy created at (%d,%d)"%(x,y))
         print(data.gameWorld.board[y][x])
+        print(data.enemy)
 
 def redrawAll(canvas, data):
     getWallHit(data)
-    print(data.enemy)
+    for entity in data.gameWorld.entities:
+        entity.think.addState(enemyStateGuarding(entity))
 
     for cell in range(len(data.walls)):
         (x0, y0, x1, y1) = getWallBounds(data, cell)

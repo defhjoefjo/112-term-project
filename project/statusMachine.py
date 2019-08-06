@@ -1,3 +1,6 @@
+import random
+from Entity import *
+
 class State(object):
     def __init__(self, name):
         self.name = name
@@ -36,3 +39,13 @@ class statusMachine(object):
             self.activeState.exitAction()
         self.activeState = self.states[newStateName]
         self.activeState.enterAction()
+
+class enemyStateGuarding(State):# at this state the enemy will make a random walk until the player enters its detection radius
+    def __init__(self,enemy):
+        super().__init__("guarding")
+        self.enemy = enemy
+    def action(self):
+        (dirX, dirY) = random.choice([(1,0),(0,1),(-1,0),(0,-1)])
+        self.enemy.move(dirX,dirY)
+    def condition(self):
+        pass
