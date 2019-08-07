@@ -8,10 +8,10 @@ class world(object):
     def addEnemy(self,entity):
         if not isinstance(entity,Enemy):
             return None
-        if(self.board[entity.y][entity.x] != 1 and
-           self.board[entity.y][entity.x] != 2):
+        if(self.board[entity.x][entity.y] != 1 and
+           self.board[entity.x][entity.y] != 2):
             self.entities.append(entity)
-            self.board[entity.y][entity.x]=entity.id
+            self.board[entity.x][entity.y]=entity.id
 
     def delEnemy(self,entity):
         if(entity in self.entities):
