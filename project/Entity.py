@@ -1,6 +1,5 @@
 import random
 from SETTINGS import *
-
 class Entity(object):
     def __init__(self, world, inventory, health, state, size, x, y):
         self.world = world
@@ -23,22 +22,13 @@ class Player(Entity):
     def __init__(self,world,inventory,health,state,size,x,y):
         super().__init__(world,inventory,health,state,size,x,y)
         self.id = 2
-
-    def pickUpWeapon(self):
-        if(self.world.board[self.x+1][self.y] == 4):
-            self.world.board[self.x + 1][self.y]=0
-        if(self.world.board[self.x][self.y+1] == 4):
-            pass
-        if(self.world.board[self.x-1][self.y] == 4):
-            pass
-        if(self.world.board[self.x][self.y-1] == 4):
-            pass
-
+        self.currentWeapon = 0
+        self.gridX = self.x // WALLSIZE
+        self.gridY = self.y // WALLSIZE
     def move(self, dirX, dirY):
-            self.world.board[self.y][self.x] = 0
             self.x += dirX
             self.y += dirY
-            self.world.board[self.y][self.x] = 2
+
 
 
 class Enemy(Entity):
@@ -65,7 +55,6 @@ class Enemy(Entity):
                 self.openList.append((self.y + direc[0],self.x + direc[1]))
             else:
                 self.closedList.append((self.y + direc[0], self.x + direc[1]))
-        self.closedList.append((self.y,self.x))
         for node in self.openList:
             HVal[self.manhattanDis(node[1],node[0])] = node
         if(len(HVal.keys())!=0):
@@ -77,6 +66,7 @@ class Enemy(Entity):
 
 
     def move(self):
+        if(self.world.board[self.y+self.dirY][self.x+self.dirX] == 0):
             self.world.board[self.y][self.x] = 0
             self.x += self.dirX
             self.y += self.dirY
@@ -86,5 +76,11 @@ class Enemy(Entity):
             self.state = 1
         if((self.world.player.x-self.x)**2+(self.world.player.y-self.y)**2)**0.5* WALLSIZE>300:
             self.state = 0
-        if 100<((self.world.player.x-self.x)**2+(self.world.player.y-self.y)**2)**0.5* WALLSIZE<150:
+        if 0<((self.world.player.x-self.x)**2+(self.world.player.y-self.y)**2)**0.5* WALLSIZE<150:
             self.state = 2
+
+    def getBound(self,data):
+        (x0,y0) = (self.x * self.size - self.size*BOARDSIZE/2 +data.centerX + data.scrollX,
+                   self.y * self.size - self.size*BOARDSIZE/2 +data.centerY + data.scrollY)
+        (x1,y1) = (x0 + WALLSIZE, y0 + WALLSIZE)
+        return (x0,y0,x1,y1)
